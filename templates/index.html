@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore live current weather conditions and 5-day weather forecasts with AeroSky Dashboard. Premium, fast, and resilient.">
+    <title>AeroSky // Real-Time Weather Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Background decorative blur shapes -->
+        <div class="blur-glow shape-1"></div>
+        <div class="blur-glow shape-2"></div>
+        
+        <header>
+            <div class="brand">
+                <i data-lucide="cloud-lightning" class="brand-icon"></i>
+                <h1>AeroSky</h1>
+            </div>
+            <div class="controls">
+                <!-- Unit Toggle -->
+                <div class="unit-toggle-wrapper">
+                    <span class="unit-label">°C</span>
+                    <button class="unit-toggle-btn" id="unitToggle" aria-label="Toggle Temperature Unit" data-unit="C">
+                        <span class="toggle-slider"></span>
+                    </button>
+                    <span class="unit-label">°F</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stale Data Resilience Banner (Phase 3) -->
+        <div id="staleBanner" class="stale-banner hidden">
+            <i data-lucide="alert-triangle"></i>
+            <span id="staleBannerText">Showing offline cached data from 10 minutes ago – service unreachable.</span>
+        </div>
+
+        <main>
+            <!-- Search & Favorites Area -->
+            <section class="search-section">
+                <form id="searchForm" class="search-form">
+                    <div class="search-input-wrapper">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="cityInput" placeholder="Enter city name..." autocomplete="off" required>
+                    </div>
+                    <button type="submit" id="searchBtn" class="search-btn">
+                        <span class="btn-text">Search</span>
+                        <i data-lucide="arrow-right" class="btn-icon"></i>
+                    </button>
+                </form>
+
+                <!-- Favorites Bar (Phase 5) -->
+                <div class="favorites-container hidden" id="favoritesContainer">
+                    <span class="favorites-title">Favorites:</span>
+                    <div class="favorites-list" id="favoritesList">
+                        <!-- Dynamic favorite buttons -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Error Alerts -->
+            <div id="errorAlert" class="error-alert hidden">
+                <i data-lucide="alert-circle" class="alert-icon"></i>
+                <span id="errorMessage">City not found. Please try again.</span>
+                <button id="closeAlertBtn" class="close-alert-btn"><i data-lucide="x"></i></button>
+            </div>
+
+            <!-- Dashboard Output -->
+            <section id="weatherDashboard" class="weather-dashboard hidden">
+                <!-- Current Weather Main Card -->
+                <div class="dashboard-grid">
+                    <div class="card main-weather-card">
+                        <div class="card-header">
+                            <div class="location-details">
+                                <h2 id="locationName">New York</h2>
+                                <span id="locationCountry" class="country-badge">US</span>
+                            </div>
+                            <!-- Favorite Toggle (Phase 5) -->
+                            <button id="favToggleBtn" class="fav-toggle-btn" aria-label="Pin city to favorites">
+                                <i data-lucide="star" id="favStarIcon"></i>
+                            </button>
+                        </div>
+                        <div class="weather-hero">
+                            <img id="weatherIcon" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Weather Icon" class="hero-icon">
+                            <div class="temp-display">
+                                <span id="mainTemp" class="temp-val">--</span>
+                                <span class="temp-deg">°</span>
+                            </div>
+                            <div class="condition-display">
+                                <p id="weatherDesc" class="condition-text">Clear Sky</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Stats Grid -->
+                    <div class="stats-grid">
+                        <!-- Feels Like -->
+                        <div class="card stat-card">
+                            <div class="stat-header">
+                                <i data-lucide="thermometer"></i>
+                                <h3>Feels Like</h3>
+                            </div>
+                            <div class="stat-value">
+                                <span id="feelsLikeTemp">--</span>°
+                            </div>
+                        </div>
+
+                        <!-- Wind Speed -->
+                        <div class="card stat-card">
+                            <div class="stat-header">
+                                <i data-lucide="wind"></i>
+                                <h3>Wind Speed</h3>
+                            </div>
+                            <div class="stat-value">
+                                <span id="windSpeed">--</span> <span class="stat-unit">m/s</span>
+                            </div>
+                        </div>
+
+                        <!-- Humidity -->
+                        <div class="card stat-card">
+                            <div class="stat-header">
+                                <i data-lucide="droplet"></i>
+                                <h3>Humidity</h3>
+                            </div>
+                            <div class="stat-value">
+                                <span id="humidity">--</span><span class="stat-unit">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Barometric Pressure -->
+                        <div class="card stat-card">
+                            <div class="stat-header">
+                                <i data-lucide="gauge"></i>
+                                <h3>Pressure</h3>
+                            </div>
+                            <div class="stat-value">
+                                <span id="pressure">--</span> <span class="stat-unit">hPa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5-Day Forecast Carousel Card (Phase 4) -->
+                <div class="card forecast-card-section hidden" id="forecastSection">
+                    <div class="forecast-header">
+                        <i data-lucide="calendar-days" class="section-icon"></i>
+                        <h3>5-Day / 3-Hour Forecast</h3>
+                    </div>
+                    <div class="forecast-container" id="forecastContainer">
+                        <!-- Dynamic forecast cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading Spinner -->
+            <div id="loadingOverlay" class="loading-overlay hidden">
+                <div class="spinner-container">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Fetching current conditions...</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Designed with premium aesthetics & resilient architecture. AeroSky &copy; 2026</p>
+        </footer>
+    </div>
+
+    <!-- Initialize Lucide icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
