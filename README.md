@@ -46,3 +46,6 @@ A production‑ready weather dashboard that shows current conditions and a 5‑d
    ```bash
    git clone https://github.com/HaiderAli1076/AeroSky.git
    cd AeroSky
+## 📸 Screenshots
+
+![AeroSky Demo](screenshots/demo.gif)
